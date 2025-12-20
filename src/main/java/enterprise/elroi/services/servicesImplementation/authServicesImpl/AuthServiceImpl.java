@@ -7,6 +7,7 @@ import enterprise.elroi.data.repositories.PasswordResetTokenRepository;
 import enterprise.elroi.data.repositories.UserRepository;
 import enterprise.elroi.dto.requests.UserRequests;
 import enterprise.elroi.dto.responses.UserResponse;
+import enterprise.elroi.exceptions.authServiceExceptions.*;
 import enterprise.elroi.services.authServices.AuthServicesInterface;
 import enterprise.elroi.util.mapper.authMapper.AuthMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class AuthServiceImpl implements AuthServicesInterface {
     public UserResponse register(UserRequests request) {
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
-            throw new RuntimeException("User already exists with this email");
+            throw new UserAlreadyExistException("User already exists with this email");
         }
 
         String hashedPassword = BCrypt.withDefaults().hashToString(12, request.getPassword().toCharArray());
@@ -49,11 +50,11 @@ public class AuthServiceImpl implements AuthServicesInterface {
     @Override
     public UserResponse login(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserLoginNotFoundException("User not found"));
 
         BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
         if (!result.verified) {
-            throw new RuntimeException("Invalid password");
+            throw new InvalidPasswordException("Invalid password");
         }
 
         return mapper.toUserResponse(user);
@@ -62,15 +63,15 @@ public class AuthServiceImpl implements AuthServicesInterface {
     @Override
     public UserResponse adminLogin(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Admin not found"));
+                .orElseThrow(() -> new AdminNotFoundException("Admin not found"));
 
         if (!"ADMIN".equalsIgnoreCase(user.getRoles())) {
-            throw new RuntimeException("User is not an admin");
+            throw new UserIsNotAnAdminException("User is not an admin");
         }
 
         BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
         if (!result.verified) {
-            throw new RuntimeException("Invalid password");
+            throw new InvalidAdminPassword("Invalid Admin password");
         }
 
         return mapper.toUserResponse(user);
@@ -79,7 +80,7 @@ public class AuthServiceImpl implements AuthServicesInterface {
     @Override
     public UserResponse getCurrentUser(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserCurrentLoginNotFoundException("User not found"));
 
         return mapper.toUserResponse(user);
     }
@@ -92,14 +93,14 @@ public class AuthServiceImpl implements AuthServicesInterface {
     @Override
     public void forgotPassword(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserForgotPasswordEmailNotFoundException("User not found"));
 
         String token = UUID.randomUUID().toString();
 
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setUserId(user.getId());
         resetToken.setToken(token);
-        resetToken.setUsed("false"); // mark as not used
+        resetToken.setUsed("false"); 
 
         tokenRepository.save(resetToken);
 
@@ -110,21 +111,21 @@ public class AuthServiceImpl implements AuthServicesInterface {
     @Override
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken resetToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+                .orElseThrow(() -> new InvalidTokenException("Invalid token"));
 
         if ("true".equalsIgnoreCase(resetToken.getUsed())) {
-            throw new RuntimeException("Token has already been used");
+            throw new TokenHasBeenUsedException("Token has already been used");
         }
 
         User user = userRepository.findById(resetToken.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundTokenException("User not found"));
 
         String hashedPassword = BCrypt.withDefaults().hashToString(12, newPassword.toCharArray());
         user.setPassword(hashedPassword);
 
         userRepository.save(user);
 
-        // Mark token as used
+        
         resetToken.setUsed("true");
         tokenRepository.save(resetToken);
 

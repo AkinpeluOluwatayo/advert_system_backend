@@ -4,6 +4,8 @@ import enterprise.elroi.data.models.Category;
 import enterprise.elroi.data.repositories.CategoryRepository;
 import enterprise.elroi.dto.requests.CategoryRequests;
 import enterprise.elroi.dto.responses.CategoryResponse;
+import enterprise.elroi.exceptions.categoryServiceExceptions.GetCategoryByIdNotFoundException;
+import enterprise.elroi.exceptions.categoryServiceExceptions.UpdateCategoryNotFoundException;
 import enterprise.elroi.services.categoryServices.CategoryServicesInterface;
 import enterprise.elroi.util.mapper.categoryMapper.CategoryMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,7 @@ public class CategoryServiceImpl implements CategoryServicesInterface {
     @Override
     public CategoryResponse getCategoryById(String categoryId) {
         Category category = repository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new GetCategoryByIdNotFoundException("Category not found"));
 
         return mapper.toResponse(category);
     }
@@ -59,7 +61,7 @@ public class CategoryServiceImpl implements CategoryServicesInterface {
     @Override
     public CategoryResponse updateCategory(String categoryId, CategoryRequests request) {
         Category category = repository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new UpdateCategoryNotFoundException("Category not found"));
 
         category.setName(request.getName());
         category.setDescription(request.getDescription());

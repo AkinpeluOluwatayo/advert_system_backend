@@ -4,6 +4,8 @@ import enterprise.elroi.data.models.Ads;
 import enterprise.elroi.data.repositories.AdsRepository;
 import enterprise.elroi.dto.requests.AdsRequests;
 import enterprise.elroi.dto.responses.AdsResponse;
+import enterprise.elroi.exceptions.adsServiceExceptions.DeleteByIdAdvertNotFound;
+import enterprise.elroi.exceptions.adsServiceExceptions.GetByIdAdvertNotFoundException;
 import enterprise.elroi.services.adsServices.AdvServicesInterface;
 import enterprise.elroi.util.mapper.advMapper.AdvMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +48,7 @@ public class AdvServicesImpl implements AdvServicesInterface {
     @Override
     public AdsResponse getAdById(String adId) {
         Ads ads = repository.findById(adId)
-                .orElseThrow(() -> new RuntimeException("Advert not found"));
+                .orElseThrow(() -> new GetByIdAdvertNotFoundException("Advert not found"));
 
         return mapper.toResponse(ads);
     }
@@ -66,7 +68,7 @@ public class AdvServicesImpl implements AdvServicesInterface {
     @Override
     public AdsResponse deleteAd(String adId, String userId) {
         Ads ads = repository.findById(adId)
-                .orElseThrow(() -> new RuntimeException("Advert not found"));
+                .orElseThrow(() -> new DeleteByIdAdvertNotFound("Advert not found"));
 
         if (!ads.getUserId().equals(userId)) {
             throw new RuntimeException("You are not allowed to delete this advert");

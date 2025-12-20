@@ -4,6 +4,9 @@ import enterprise.elroi.data.models.Chats;
 import enterprise.elroi.data.repositories.ChatsRepository;
 import enterprise.elroi.dto.requests.ChatsRequests;
 import enterprise.elroi.dto.responses.ChatsResponse;
+import enterprise.elroi.exceptions.chatServiceExceptions.DeleteChatNoChatFoundException;
+import enterprise.elroi.exceptions.chatServiceExceptions.GetChatByIdChatNotFoundException;
+import enterprise.elroi.exceptions.chatServiceExceptions.NotAllowedToDeleteChatException;
 import enterprise.elroi.services.chatServices.ChatServicesInterface;
 import enterprise.elroi.util.mapper.chatMapper.ChatMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,17 +55,17 @@ public class ChatServiceImpl implements ChatServicesInterface {
     @Override
     public ChatsResponse getChatById(String chatId) {
         Chats chat = repository.findById(chatId)
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new GetChatByIdChatNotFoundException("Chat not found"));
 
         return mapper.toResponse(chat);
     }
     @Override
     public void deleteChat(String chatId, String userId) {
         Chats chat = repository.findById(chatId)
-                .orElseThrow(() -> new RuntimeException("Chat not found"));
+                .orElseThrow(() -> new DeleteChatNoChatFoundException("Chat not found"));
 
         if (chat.getParticipantIds() == null || !chat.getParticipantIds().contains(userId)) {
-            throw new RuntimeException("You are not allowed to delete this chat");
+            throw new NotAllowedToDeleteChatException("You are not allowed to delete this chat");
         }
 
         repository.delete(chat);

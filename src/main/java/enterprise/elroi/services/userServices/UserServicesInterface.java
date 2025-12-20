@@ -9,13 +9,12 @@ public interface UserServicesInterface {
 
     UserResponse getUserById(String userId);
 
-    // Get all users (optional, admin use)
+
     List<UserResponse> getAllUsers();
 
 
     UserResponse updateUser(String userId, UserRequests request);
 
-    // Delete a user (optional, admin use)
     void deleteUser(String userId);
 
 

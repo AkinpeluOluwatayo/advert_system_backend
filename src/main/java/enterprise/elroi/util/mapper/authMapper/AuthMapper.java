@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Component
 public class AuthMapper {
 
-    // Map UserRequests to User entity
+
     public User toUser(UserRequests request) {
         User user = new User();
         user.setEmail(request.getEmail());
@@ -21,7 +21,7 @@ public class AuthMapper {
         return user;
     }
 
-    // Map User entity to UserResponse DTO
+
     public UserResponse toUserResponse(User user) {
         UserResponse response = new UserResponse();
         response.setId(user.getId());
