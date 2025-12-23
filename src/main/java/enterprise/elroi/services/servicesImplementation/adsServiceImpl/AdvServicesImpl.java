@@ -85,25 +85,33 @@ public class AdvServicesImpl implements AdvServicesInterface {
         List<AdsResponse> responses = new ArrayList<>();
 
         for (Ads ads : adsList) {
-            if (!matchesFilters(ads, keyword, location, minPrice, maxPrice)) {
-                continue;
+            if (matchesFiltersSafe(ads, keyword, location, minPrice, maxPrice)) {
+                responses.add(mapper.toResponse(ads));
             }
-            responses.add(mapper.toResponse(ads));
         }
 
         return responses;
     }
 
-    private boolean matchesFilters(Ads ads, String keyword, String location, Double minPrice, Double maxPrice) {
-        if (keyword != null && !ads.getTitle().toLowerCase().contains(keyword.toLowerCase())) {
+
+    private boolean matchesFiltersSafe(Ads ads, String keyword, String location, Double minPrice, Double maxPrice) {
+        String adTitle = ads.getTitle() != null ? ads.getTitle() : "";
+        String adLocation = ads.getLocation() != null ? ads.getLocation() : "";
+
+        if (keyword != null && !adTitle.toLowerCase().contains(keyword.toLowerCase())) {
             return false;
         }
-        if (location != null && !ads.getLocation().equalsIgnoreCase(location)) {
+        if (location != null && !adLocation.equalsIgnoreCase(location)) {
             return false;
         }
-        if (minPrice != null && ads.getPrice() < minPrice) {
+        if (minPrice != null && (ads.getPrice() == null || ads.getPrice() < minPrice)) {
             return false;
         }
-        return maxPrice == null || ads.getPrice() <= maxPrice;
+        if (maxPrice != null && (ads.getPrice() == null || ads.getPrice() > maxPrice)) {
+            return false;
+        }
+
+        return true;
     }
+
 }

@@ -10,5 +10,5 @@ public class PasswordResetToken {
     private String id;
     private String userId;
     private String token;
-    private String used;
+    private boolean used;
 }

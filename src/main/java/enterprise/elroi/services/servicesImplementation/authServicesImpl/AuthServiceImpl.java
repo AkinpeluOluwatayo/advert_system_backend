@@ -85,10 +85,6 @@ public class AuthServiceImpl implements AuthServicesInterface {
         return mapper.toUserResponse(user);
     }
 
-    @Override
-    public void logout(String userId) {
-        System.out.println("User logged out: " + userId);
-    }
 
     @Override
     public void forgotPassword(String email) {
@@ -100,20 +96,21 @@ public class AuthServiceImpl implements AuthServicesInterface {
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setUserId(user.getId());
         resetToken.setToken(token);
-        resetToken.setUsed("false"); 
+        resetToken.setUsed(false);
 
         tokenRepository.save(resetToken);
 
-        // Send email with reset link (replace with real email sending)
-        System.out.println("Reset link: http://yourapp.com/reset-password?token=" + token);
+        System.out.println("Reset link: https://DealBridge.com/reset-password?token=" + token);
     }
 
     @Override
     public void resetPassword(String token, String newPassword) {
+        System.out.println("Resetting password for token: " + token);
         PasswordResetToken resetToken = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new InvalidTokenException("Invalid token"));
+        System.out.println("Found reset token for userId: " + resetToken.getUserId());
 
-        if ("true".equalsIgnoreCase(resetToken.getUsed())) {
+        if (resetToken.isUsed()) {
             throw new TokenHasBeenUsedException("Token has already been used");
         }
 
@@ -125,10 +122,10 @@ public class AuthServiceImpl implements AuthServicesInterface {
 
         userRepository.save(user);
 
-        
-        resetToken.setUsed("true");
+        resetToken.setUsed(true);
         tokenRepository.save(resetToken);
 
         System.out.println("Password successfully reset for user: " + user.getEmail());
     }
+
 }

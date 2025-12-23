@@ -14,8 +14,6 @@ public interface AuthServicesInterface {
     UserResponse getCurrentUser(String userId);
 
 
-    void logout(String userId);
-
     void forgotPassword(String email);
 
 
