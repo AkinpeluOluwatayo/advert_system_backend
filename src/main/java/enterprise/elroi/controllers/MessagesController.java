@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/messages")
 public class MessagesController {
 
@@ -23,23 +24,17 @@ public class MessagesController {
     }
 
     @PostMapping("/send")
-    public ResponseEntity<?> sendMessage(@RequestBody MessagesRequests request,
-                                         @RequestParam String senderId) {
-        try {
-            MessagesResponse response = messageService.sendMessage(request, senderId);
-            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<ApiResponse<MessagesResponse>> sendMessage(
+            @RequestBody MessagesRequests request,
+            @RequestParam String senderId) {
+
+        MessagesResponse response = messageService.sendMessage(request, senderId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response));
     }
 
     @GetMapping("/chat/{chatId}")
-    public ResponseEntity<?> getMessagesByChat(@PathVariable String chatId) {
-        try {
-            List<MessagesResponse> responses = messageService.getMessagesByChat(chatId);
-            return new ResponseEntity<>(new ApiResponse(true, responses), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<ApiResponse<List<MessagesResponse>>> getMessagesByChat(@PathVariable String chatId) {
+        List<MessagesResponse> responses = messageService.getMessagesByChat(chatId);
+        return ResponseEntity.ok(new ApiResponse<>(true, responses));
     }
 }

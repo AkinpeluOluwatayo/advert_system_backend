@@ -31,26 +31,34 @@ public class ChatServiceImpl implements ChatServicesInterface {
     @Override
     public ChatsResponse createChat(ChatsRequests request, String userId) {
         Chats chat = new Chats();
-        chat.setParticipantIds(request.getParticipantIds());
+        chat.setParticipantId(request.getParticipantId());
+        chat.setCreatedBy(userId);
         chat.setLastMessage(null);
         chat.setUpdatedAt(LocalDateTime.now());
 
         Chats savedChat = repository.save(chat);
         return mapper.toResponse(savedChat);
     }
+
+
     @Override
     public List<ChatsResponse> getChatsByUser(String userId) {
-        List<Chats> chatsList = repository.findAll(); // optional: filter by participantIds
-        List<ChatsResponse> responses = new ArrayList<>();
+        List<Chats> chatsList = repository.findAll();
+        if (chatsList == null) chatsList = new ArrayList<>();
 
+        List<ChatsResponse> responses = new ArrayList<>();
         for (Chats chat : chatsList) {
-            if (chat.getParticipantIds() != null && chat.getParticipantIds().contains(userId)) {
-                responses.add(mapper.toResponse(chat));
+            try {
+                if (chat.getParticipantId() != null && chat.getParticipantId().contains(userId)) {
+                    responses.add(mapper.toResponse(chat));
+                }
+            } catch (Exception ex) {
+
             }
         }
-
         return responses;
     }
+
 
     @Override
     public ChatsResponse getChatById(String chatId) {
@@ -59,15 +67,14 @@ public class ChatServiceImpl implements ChatServicesInterface {
 
         return mapper.toResponse(chat);
     }
-    @Override
-    public void deleteChat(String chatId, String userId) {
-        Chats chat = repository.findById(chatId)
-                .orElseThrow(() -> new DeleteChatNoChatFoundException("Chat not found"));
 
-        if (chat.getParticipantIds() == null || !chat.getParticipantIds().contains(userId)) {
-            throw new NotAllowedToDeleteChatException("You are not allowed to delete this chat");
+    public void deleteChat(String userId) {
+
+        List<Chats> chats = repository.findByParticipantIdContaining(userId);
+
+        if (chats.isEmpty()) {
+            throw new DeleteChatNoChatFoundException("No chats found for this user");
         }
 
-        repository.delete(chat);
-    }
+}
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 @Data
 public class AdsResponse {
-
+    private String id;
     private String title;
     private String description;
     private Double price;

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/chat")
 public class ChatController {
 
@@ -23,42 +24,32 @@ public class ChatController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createChat(@RequestBody ChatsRequests request, @RequestParam String userId) {
-        try {
-            ChatsResponse response = chatService.createChat(request, userId);
-            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<ApiResponse<ChatsResponse>> createChat(
+            @RequestParam("userId") String userId,
+            @RequestBody ChatsRequests request
+    ) {
+        ChatsResponse response = chatService.createChat(request, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getChatsByUser(@PathVariable String userId) {
-        try {
-            List<ChatsResponse> responses = chatService.getChatsByUser(userId);
-            return new ResponseEntity<>(new ApiResponse(true, responses), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<ApiResponse<List<ChatsResponse>>> getChatsByUser(@PathVariable("userId") String userId) {
+        List<ChatsResponse> responses = chatService.getChatsByUser(userId);
+        return ResponseEntity.ok(new ApiResponse<>(true, responses));
     }
 
     @GetMapping("/{chatId}")
-    public ResponseEntity<?> getChatById(@PathVariable String chatId) {
-        try {
-            ChatsResponse response = chatService.getChatById(chatId);
-            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ApiResponse<ChatsResponse>> getChatById(@PathVariable("chatId") String chatId) {
+        ChatsResponse response = chatService.getChatById(chatId);
+        return ResponseEntity.ok(new ApiResponse<>(true, response));
     }
 
-    @DeleteMapping("/delete/{chatId}")
-    public ResponseEntity<?> deleteChat(@PathVariable String chatId, @RequestParam String userId) {
-        try {
-            chatService.deleteChat(chatId, userId);
-            return new ResponseEntity<>(new ApiResponse(true, "Chat deleted successfully"), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse<String>> deleteChatsByUser(
+            @RequestParam("userId") String userId
+    ) {
+        chatService.deleteChat(userId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "All chats for the user deleted successfully"));
     }
+
 }

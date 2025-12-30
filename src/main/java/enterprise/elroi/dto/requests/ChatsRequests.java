@@ -10,5 +10,8 @@ import java.util.ArrayList;
 public class ChatsRequests {
     @NotBlank
    private String adId;
-    private ArrayList<String> participantIds;
+//    private ArrayList<String> participantIds;
+    private String participantId;
+    @NotBlank
+    private String message;
 }

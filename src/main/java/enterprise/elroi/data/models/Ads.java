@@ -1,4 +1,6 @@
 package enterprise.elroi.data.models;
+import org.bson.types.ObjectId;
+
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

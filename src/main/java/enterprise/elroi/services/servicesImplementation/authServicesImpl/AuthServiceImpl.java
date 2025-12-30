@@ -8,12 +8,12 @@ import enterprise.elroi.data.repositories.UserRepository;
 import enterprise.elroi.dto.requests.UserRequests;
 import enterprise.elroi.dto.responses.UserResponse;
 import enterprise.elroi.exceptions.authServiceExceptions.*;
+import enterprise.elroi.security.UserPrincipal;
 import enterprise.elroi.services.authServices.AuthServicesInterface;
 import enterprise.elroi.util.mapper.authMapper.AuthMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,8 +34,8 @@ public class AuthServiceImpl implements AuthServicesInterface {
 
     @Override
     public UserResponse register(UserRequests request) {
-        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-        if (existingUser.isPresent()) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistException("User already exists with this email");
         }
 
@@ -71,7 +71,7 @@ public class AuthServiceImpl implements AuthServicesInterface {
 
         BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
         if (!result.verified) {
-            throw new InvalidAdminPassword("Invalid Admin password");
+            throw new InvalidAdminPassword("Invalid admin password");
         }
 
         return mapper.toUserResponse(user);
@@ -81,10 +81,8 @@ public class AuthServiceImpl implements AuthServicesInterface {
     public UserResponse getCurrentUser(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserCurrentLoginNotFoundException("User not found"));
-
         return mapper.toUserResponse(user);
     }
-
 
     @Override
     public void forgotPassword(String email) {
@@ -92,12 +90,10 @@ public class AuthServiceImpl implements AuthServicesInterface {
                 .orElseThrow(() -> new UserForgotPasswordEmailNotFoundException("User not found"));
 
         String token = UUID.randomUUID().toString();
-
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setUserId(user.getId());
         resetToken.setToken(token);
         resetToken.setUsed(false);
-
         tokenRepository.save(resetToken);
 
         System.out.println("Reset link: https://DealBridge.com/reset-password?token=" + token);
@@ -105,13 +101,11 @@ public class AuthServiceImpl implements AuthServicesInterface {
 
     @Override
     public void resetPassword(String token, String newPassword) {
-        System.out.println("Resetting password for token: " + token);
         PasswordResetToken resetToken = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new InvalidTokenException("Invalid token"));
-        System.out.println("Found reset token for userId: " + resetToken.getUserId());
 
         if (resetToken.isUsed()) {
-            throw new TokenHasBeenUsedException("Token has already been used");
+            throw new TokenHasBeenUsedException("Token already used");
         }
 
         User user = userRepository.findById(resetToken.getUserId())
@@ -119,7 +113,6 @@ public class AuthServiceImpl implements AuthServicesInterface {
 
         String hashedPassword = BCrypt.withDefaults().hashToString(12, newPassword.toCharArray());
         user.setPassword(hashedPassword);
-
         userRepository.save(user);
 
         resetToken.setUsed(true);
@@ -128,4 +121,14 @@ public class AuthServiceImpl implements AuthServicesInterface {
         System.out.println("Password successfully reset for user: " + user.getEmail());
     }
 
+    @Override
+    public UserPrincipal loadUserById(String userId) {
+        UserResponse userResponse = getCurrentUser(userId);
+        return new UserPrincipal(userResponse.getId(), userResponse.getEmail(), userResponse.getRoles());
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }

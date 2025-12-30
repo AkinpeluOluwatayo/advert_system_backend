@@ -8,12 +8,16 @@ import enterprise.elroi.exceptions.adsServiceExceptions.DeleteByIdAdvertNotFound
 import enterprise.elroi.exceptions.adsServiceExceptions.GetByIdAdvertNotFoundException;
 import enterprise.elroi.services.adsServices.AdvServicesInterface;
 import enterprise.elroi.util.mapper.advMapper.AdvMapper;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdvServicesImpl implements AdvServicesInterface {
@@ -41,15 +45,23 @@ public class AdvServicesImpl implements AdvServicesInterface {
         ads.setUpdatedAt(LocalDateTime.now());
 
         Ads savedAds = repository.save(ads);
-
         return mapper.toResponse(savedAds);
     }
-
     @Override
     public AdsResponse getAdById(String adId) {
-        Ads ads = repository.findById(adId)
-                .orElseThrow(() -> new GetByIdAdvertNotFoundException("Advert not found"));
+        if (adId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID cannot be null");
 
+        // 1. Clean the ID
+        String cleanId = adId.trim().replaceAll("[^0-9a-fA-F]", "");
+
+        System.out.println("--- SERVICE DEBUG ---");
+        System.out.println("Searching for ID: " + cleanId);
+
+        // 2. This will no longer flag an error because the Repository now accepts String
+        Ads ads = repository.findById(cleanId)
+                .orElseThrow(() -> new GetByIdAdvertNotFoundException("Advert not found with ID: " + cleanId));
+
+        System.out.println("SUCCESS: Found " + ads.getTitle());
         return mapper.toResponse(ads);
     }
 
@@ -57,25 +69,25 @@ public class AdvServicesImpl implements AdvServicesInterface {
     public List<AdsResponse> getAdsByUser(String userId) {
         List<Ads> adsList = repository.findByUserId(userId);
         List<AdsResponse> responses = new ArrayList<>();
-
         for (Ads ads : adsList) {
             responses.add(mapper.toResponse(ads));
         }
-
         return responses;
     }
 
     @Override
     public AdsResponse deleteAd(String adId, String userId) {
-        Ads ads = repository.findById(adId)
+        // Use the same cleaning logic for delete
+        String cleanId = adId.trim().replaceAll("[^0-9a-fA-F]", "");
+
+        Ads ads = repository.findById(cleanId)
                 .orElseThrow(() -> new DeleteByIdAdvertNotFound("Advert not found"));
 
         if (!ads.getUserId().equals(userId)) {
-            throw new RuntimeException("You are not allowed to delete this advert");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this advert");
         }
 
         repository.delete(ads);
-
         return mapper.toResponse(ads);
     }
 
@@ -89,29 +101,18 @@ public class AdvServicesImpl implements AdvServicesInterface {
                 responses.add(mapper.toResponse(ads));
             }
         }
-
         return responses;
     }
-
 
     private boolean matchesFiltersSafe(Ads ads, String keyword, String location, Double minPrice, Double maxPrice) {
         String adTitle = ads.getTitle() != null ? ads.getTitle() : "";
         String adLocation = ads.getLocation() != null ? ads.getLocation() : "";
 
-        if (keyword != null && !adTitle.toLowerCase().contains(keyword.toLowerCase())) {
-            return false;
-        }
-        if (location != null && !adLocation.equalsIgnoreCase(location)) {
-            return false;
-        }
-        if (minPrice != null && (ads.getPrice() == null || ads.getPrice() < minPrice)) {
-            return false;
-        }
-        if (maxPrice != null && (ads.getPrice() == null || ads.getPrice() > maxPrice)) {
-            return false;
-        }
+        if (keyword != null && !adTitle.toLowerCase().contains(keyword.toLowerCase())) return false;
+        if (location != null && !adLocation.equalsIgnoreCase(location)) return false;
+        if (minPrice != null && (ads.getPrice() == null || ads.getPrice() < minPrice)) return false;
+        if (maxPrice != null && (ads.getPrice() == null || ads.getPrice() > maxPrice)) return false;
 
         return true;
     }
-
 }

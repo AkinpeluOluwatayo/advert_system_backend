@@ -3,16 +3,15 @@ package enterprise.elroi.controllers;
 import enterprise.elroi.dto.requests.CategoryRequests;
 import enterprise.elroi.dto.responses.ApiResponse;
 import enterprise.elroi.dto.responses.CategoryResponse;
-import enterprise.elroi.exceptions.categoryServiceExceptions.GetCategoryByIdNotFoundException;
 import enterprise.elroi.services.categoryServices.CategoryServicesInterface;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/category")
 public class CategoryController {
 
@@ -24,52 +23,34 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createCategory(@RequestBody CategoryRequests request) {
-        try {
-            CategoryResponse response = categoryService.createCategory(request);
-            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@RequestBody CategoryRequests request) {
+        CategoryResponse response = categoryService.createCategory(request);
+        return ResponseEntity.status(201).body(new ApiResponse<>(true, response));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllCategories() {
-        try {
-            List<CategoryResponse> responses = categoryService.getAllCategories();
-            return new ResponseEntity<>(new ApiResponse(true, responses), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+        List<CategoryResponse> responses = categoryService.getAllCategories();
+        return ResponseEntity.ok(new ApiResponse<>(true, responses));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCategoryById(@PathVariable String id) {
-        try {
-            CategoryResponse response = categoryService.getCategoryById(id);
-            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
-        } catch (GetCategoryByIdNotFoundException e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable("id") String id) {
+        CategoryResponse response = categoryService.getCategoryById(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, response));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable String id, @RequestBody CategoryRequests request) {
-        try {
-            CategoryResponse response = categoryService.updateCategory(id, request);
-            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
+            @PathVariable("id") String id,
+            @RequestBody CategoryRequests request) {
+        CategoryResponse response = categoryService.updateCategory(id, request);
+        return ResponseEntity.ok(new ApiResponse<>(true, response));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteCategory(@PathVariable String id) {
-        try {
-            categoryService.deleteCategory(id);
-            return new ResponseEntity<>(new ApiResponse(true, "Category deleted successfully"), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable("id") String id) {
+        categoryService.deleteCategory(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Category deleted successfully"));
     }
 }

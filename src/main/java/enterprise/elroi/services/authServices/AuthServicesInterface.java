@@ -2,6 +2,7 @@ package enterprise.elroi.services.authServices;
 
 import enterprise.elroi.dto.requests.UserRequests;
 import enterprise.elroi.dto.responses.UserResponse;
+import enterprise.elroi.security.UserPrincipal;
 
 public interface AuthServicesInterface {
     UserResponse register(UserRequests request);
@@ -18,4 +19,8 @@ public interface AuthServicesInterface {
 
 
     void resetPassword(String token, String newPassword);
+
+    UserPrincipal loadUserById(String userId);
+    boolean existsByEmail(String email);
+
 }

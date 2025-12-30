@@ -11,8 +11,8 @@ public class ChatMapper {
         if (chat == null) return null;
 
         ChatsResponse response = new ChatsResponse();
-        response.setAdId(null); // set if your model has adId
-        response.setParticipantIds(chat.getParticipantIds());
+        response.setAdId(null);
+        response.setParticipantId(chat.getParticipantId());
         response.setLastMessage(chat.getLastMessage());
         response.setUpdatedAt(chat.getUpdatedAt());
 

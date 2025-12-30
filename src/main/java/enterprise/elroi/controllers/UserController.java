@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/users")
 public class UserController {
 
@@ -23,42 +24,26 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable String userId) {
-        try {
-            UserResponse response = userService.getUserById(userId);
-            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String userId) {
+        UserResponse response = userService.getUserById(userId);
+        return ResponseEntity.ok(new ApiResponse<>(true, response));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllUsers() {
-        try {
-            List<UserResponse> responses = userService.getAllUsers();
-            return new ResponseEntity<>(new ApiResponse(true, responses), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+        List<UserResponse> responses = userService.getAllUsers();
+        return ResponseEntity.ok(new ApiResponse<>(true, responses));
     }
 
     @PutMapping("/update/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable String userId, @RequestBody UserRequests request) {
-        try {
-            UserResponse response = userService.updateUser(userId, request);
-            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable String userId, @RequestBody UserRequests request) {
+        UserResponse response = userService.updateUser(userId, request);
+        return ResponseEntity.ok(new ApiResponse<>(true, response));
     }
 
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
-        try {
-            userService.deleteUser(userId);
-            return new ResponseEntity<>(new ApiResponse(true, "User deleted successfully"), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, e.getMessage()), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "User deleted successfully"));
     }
 }

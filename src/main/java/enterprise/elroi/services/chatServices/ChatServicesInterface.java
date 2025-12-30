@@ -14,5 +14,6 @@ public interface ChatServicesInterface {
     ChatsResponse getChatById(String chatId);
 
 
-    void deleteChat(String chatId, String userId);
+    void deleteChat(String chatId);
+
 }

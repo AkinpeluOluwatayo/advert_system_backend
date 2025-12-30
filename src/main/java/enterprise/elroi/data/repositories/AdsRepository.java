@@ -1,6 +1,7 @@
 package enterprise.elroi.data.repositories;
 
 import enterprise.elroi.data.models.Ads;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;

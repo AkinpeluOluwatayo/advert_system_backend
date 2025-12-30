@@ -12,7 +12,9 @@ import java.util.ArrayList;
 public class Chats {
     @Id
     private String id;
-    private ArrayList<String> participantIds;
+
+    private String participantId;
+    private String createdBy;
     private String lastMessage;
     private LocalDateTime updatedAt;
 }
