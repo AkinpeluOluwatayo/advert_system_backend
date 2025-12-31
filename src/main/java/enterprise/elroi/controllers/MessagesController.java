@@ -26,14 +26,14 @@ public class MessagesController {
     @PostMapping("/send")
     public ResponseEntity<ApiResponse<MessagesResponse>> sendMessage(
             @RequestBody MessagesRequests request,
-            @RequestParam String senderId) {
+            @RequestParam("senderId") String senderId) {
 
         MessagesResponse response = messageService.sendMessage(request, senderId);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response));
     }
 
     @GetMapping("/chat/{chatId}")
-    public ResponseEntity<ApiResponse<List<MessagesResponse>>> getMessagesByChat(@PathVariable String chatId) {
+    public ResponseEntity<ApiResponse<List<MessagesResponse>>> getMessagesByChat(@PathVariable("chatId") String chatId) {
         List<MessagesResponse> responses = messageService.getMessagesByChat(chatId);
         return ResponseEntity.ok(new ApiResponse<>(true, responses));
     }

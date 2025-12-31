@@ -8,7 +8,7 @@ public class UserRequests {
     @NotBlank
     private String email;
     @NotBlank
-    private String password;;
+    private String password;
     @NotBlank
     private String address;
     @NotBlank

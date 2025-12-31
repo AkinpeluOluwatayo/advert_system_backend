@@ -84,21 +84,31 @@ public class AuthServiceImpl implements AuthServicesInterface {
         return mapper.toUserResponse(user);
     }
 
+    // AuthServiceImpl.java
+
     @Override
     public void forgotPassword(String email) {
+        // Debugging: check what is actually arriving from React
+        System.out.println("Processing forgot password for email: " + email);
+
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserForgotPasswordEmailNotFoundException("User not found"));
+                .orElseThrow(() -> new UserForgotPasswordEmailNotFoundException("User not found with email: " + email));
+
+        // Delete any old tokens for this user if you want to keep DB clean (Optional)
 
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setUserId(user.getId());
         resetToken.setToken(token);
         resetToken.setUsed(false);
+
         tokenRepository.save(resetToken);
 
-        System.out.println("Reset link: https://DealBridge.com/reset-password?token=" + token);
+        // Ensure this uses http (not https) unless you have SSL set up locally
+        System.out.println("============================================");
+        System.out.println("Password Reset link: http://localhost:5173/reset-password?token=" + token);
+        System.out.println("============================================");
     }
-
     @Override
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken resetToken = tokenRepository.findByToken(token)

@@ -43,18 +43,15 @@ public class AdvController {
         return ResponseEntity.ok(new ApiResponse<>(true, data));
     }
 
+    // FIXED: Added explicit ("adId")
     @GetMapping("/{adId}")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getAdById(@PathVariable String adId) {
-        // 1. Log the arrival
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAdById(@PathVariable("adId") String adId) {
         System.out.println("DEBUG: Request received for Ad ID: [" + adId + "]");
 
         try {
-            // 2. Call the service
             AdsResponse response = advServices.getAdById(adId);
 
-            // 3. Handle null response (Ad not found)
             if (response == null) {
-                System.out.println("DEBUG: No advertisement found in database for ID: " + adId);
                 Map<String, Object> errorData = new HashMap<>();
                 errorData.put("message", "Advertisement not found");
                 return ResponseEntity.status(404).body(new ApiResponse<>(false, errorData));
@@ -65,14 +62,10 @@ public class AdvController {
             return ResponseEntity.ok(new ApiResponse<>(true, data));
 
         } catch (IllegalArgumentException e) {
-            // This catches "Invalid Hex string" errors from MongoDB
-            System.err.println("DEBUG: Invalid ID format error: " + e.getMessage());
             Map<String, Object> errorData = new HashMap<>();
             errorData.put("message", "Invalid ID format provided");
             return ResponseEntity.status(400).body(new ApiResponse<>(false, errorData));
         } catch (Exception e) {
-            // This catches general service/database errors
-            System.err.println("DEBUG: Unexpected Error: ");
             e.printStackTrace();
             Map<String, Object> errorData = new HashMap<>();
             errorData.put("message", "An internal error occurred: " + e.getMessage());
@@ -96,9 +89,10 @@ public class AdvController {
         return ResponseEntity.ok(new ApiResponse<>(true, data));
     }
 
+    // FIXED: Added explicit ("adId")
     @DeleteMapping("/delete/{adId}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> deleteAd(
-            @PathVariable String adId,
+            @PathVariable("adId") String adId,
             @AuthenticationPrincipal UserPrincipal user
     ) {
         if (user == null) {
@@ -113,12 +107,13 @@ public class AdvController {
         return ResponseEntity.ok(new ApiResponse<>(true, data));
     }
 
+    // FIXED: Added explicit names to @RequestParam
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAllAds(
-            @RequestParam(name = "keyword", required = false) String keyword,
-            @RequestParam(name = "location", required = false) String location,
-            @RequestParam(name = "minPrice", required = false) Double minPrice,
-            @RequestParam(name = "maxPrice", required = false) Double maxPrice
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "minPrice", required = false) Double minPrice,
+            @RequestParam(value = "maxPrice", required = false) Double maxPrice
     ) {
         List<AdsResponse> responses = advServices.getAllAds(keyword, location, minPrice, maxPrice);
         Map<String, Object> data = new HashMap<>();

@@ -27,11 +27,8 @@ public class AuthController {
         this.jwtUtils = jwtUtils;
     }
 
-
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> register(
-            @RequestBody UserRequests request
-    ) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> register(@RequestBody UserRequests request) {
         try {
             UserResponse registeredUser = authService.register(request);
             String token = generateToken(registeredUser);
@@ -40,31 +37,22 @@ public class AuthController {
             data.put("user", registeredUser);
             data.put("token", token);
 
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponse<>(true, data));
-
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, data));
         } catch (UserAlreadyExistException e) {
             Map<String, Object> errorData = new HashMap<>();
             errorData.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponse<>(false, errorData));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, errorData));
         } catch (Exception e) {
             Map<String, Object> errorData = new HashMap<>();
-            errorData.put("message", "Registration failed. Please try again.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse<>(false, errorData));
+            errorData.put("message", "Registration failed.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, errorData));
         }
     }
 
-
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> login(
-            @RequestBody UserRequests request
-    ) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> login(@RequestBody UserRequests request) {
         try {
-            UserResponse userResponse =
-                    authService.login(request.getEmail(), request.getPassword());
-
+            UserResponse userResponse = authService.login(request.getEmail(), request.getPassword());
             String token = generateToken(userResponse);
 
             Map<String, Object> data = new HashMap<>();
@@ -72,20 +60,62 @@ public class AuthController {
             data.put("token", token);
 
             return ResponseEntity.ok(new ApiResponse<>(true, data));
-
         } catch (Exception e) {
             Map<String, Object> errorData = new HashMap<>();
             errorData.put("message", "Invalid email or password");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, errorData));
+        }
+    }
+// AuthController.java
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> forgotPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            if (email == null || email.isEmpty()) {
+                throw new IllegalArgumentException("Email is required");
+            }
+
+            authService.forgotPassword(email);
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("message", "Reset link has been generated (check console)");
+            return ResponseEntity.ok(new ApiResponse<>(true, data));
+        } catch (Exception e) {
+            // This print statement is vital for debugging the 500 error!
+            System.out.println("Forgot Password Error: " + e.getMessage());
+
+            Map<String, Object> errorData = new HashMap<>();
+            errorData.put("message", e.getMessage());
+
+            // Changing to BAD_REQUEST to avoid the generic 500 error
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ApiResponse<>(false, errorData));
         }
     }
 
+    // --- NEW: RESET PASSWORD ENDPOINT ---
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> resetPassword(
+            @RequestParam("token") String token,
+            @RequestBody Map<String, String> request
+    ) {
+        try {
+            String newPassword = request.get("newPassword");
+            authService.resetPassword(token, newPassword);
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("message", "Password successfully reset");
+            return ResponseEntity.ok(new ApiResponse<>(true, data));
+        } catch (Exception e) {
+            Map<String, Object> errorData = new HashMap<>();
+            errorData.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, errorData));
+        }
+    }
 
     @PostMapping("/admin/login")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> adminLogin(
-            @RequestBody UserRequests request
-    ) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> adminLogin(@RequestBody UserRequests request) {
         try {
             UserResponse adminResponse = authService.adminLogin(request.getEmail(), request.getPassword());
             String token = generateToken(adminResponse);
@@ -95,13 +125,10 @@ public class AuthController {
             data.put("token", token);
 
             return ResponseEntity.ok(new ApiResponse<>(true, data));
-
         } catch (Exception e) {
             Map<String, Object> errorData = new HashMap<>();
             errorData.put("message", "Invalid admin credentials");
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>(false, errorData));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, errorData));
         }
     }
 
