@@ -1,7 +1,7 @@
 FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
-# Copy everything
+
 COPY . .
 
 RUN ./mvnw clean package -DskipTests
