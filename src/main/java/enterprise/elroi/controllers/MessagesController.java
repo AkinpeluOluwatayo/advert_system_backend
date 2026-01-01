@@ -24,10 +24,7 @@ public class MessagesController {
     }
 
     @PostMapping("/send")
-    public ResponseEntity<ApiResponse<MessagesResponse>> sendMessage(
-            @RequestBody MessagesRequests request,
-            @RequestParam("senderId") String senderId) {
-
+    public ResponseEntity<ApiResponse<MessagesResponse>> sendMessage(@RequestBody MessagesRequests request, @RequestParam("senderId") String senderId) {
         MessagesResponse response = messageService.sendMessage(request, senderId);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, response));
     }

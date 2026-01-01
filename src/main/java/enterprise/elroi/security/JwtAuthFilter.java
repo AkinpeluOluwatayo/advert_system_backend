@@ -33,7 +33,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (token != null && jwtUtils.validateJwtToken(token)) {
             String userId = jwtUtils.getUserIdFromJwt(token);
-            var userPrincipal = authService.loadUserById(userId); // returns UserPrincipal
+            var userPrincipal = authService.loadUserById(userId);
             var authentication = new UsernamePasswordAuthenticationToken(
                     userPrincipal, null, userPrincipal.getAuthorities()
             );

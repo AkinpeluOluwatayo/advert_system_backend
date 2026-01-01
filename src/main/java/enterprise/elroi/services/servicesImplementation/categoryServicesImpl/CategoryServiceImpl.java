@@ -33,7 +33,6 @@ public class CategoryServiceImpl implements CategoryServicesInterface {
         category.setName(request.getName());
         category.setDescription(request.getDescription());
         category.setCreatedAt(LocalDateTime.now());
-
         Category savedCategory = repository.save(category);
         return mapper.toResponse(savedCategory);
     }
@@ -42,11 +41,9 @@ public class CategoryServiceImpl implements CategoryServicesInterface {
     public List<CategoryResponse> getAllCategories() {
         List<Category> categories = repository.findAll();
         List<CategoryResponse> responses = new ArrayList<>();
-
         for (Category category : categories) {
             responses.add(mapper.toResponse(category));
         }
-
         return responses;
     }
 

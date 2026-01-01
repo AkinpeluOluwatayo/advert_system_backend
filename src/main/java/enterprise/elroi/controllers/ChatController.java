@@ -45,9 +45,7 @@ public class ChatController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<String>> deleteChatsByUser(
-            @RequestParam("userId") String userId
-    ) {
+    public ResponseEntity<ApiResponse<String>> deleteChatsByUser(@RequestParam("userId") String userId) {
         chatService.deleteChat(userId);
         return ResponseEntity.ok(new ApiResponse<>(true, "All chats for the user deleted successfully"));
     }

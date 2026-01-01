@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface MessagesServicesInterface {
 
-
     MessagesResponse sendMessage(MessagesRequests request, String senderId);
-
     List<MessagesResponse> getMessagesByChat(String chatId);
 }

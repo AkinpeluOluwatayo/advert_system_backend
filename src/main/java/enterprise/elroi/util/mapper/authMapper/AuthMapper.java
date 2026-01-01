@@ -13,7 +13,6 @@ public class AuthMapper {
     public User toUser(UserRequests request) {
         User user = new User();
         user.setEmail(request.getEmail());
-
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
         user.setRoles(request.getRoles());

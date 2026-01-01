@@ -30,7 +30,6 @@ public class UserServiceImpl implements UserServicesInterface {
     public UserResponse getUserById(String userId) {
         User user = repository.findById(userId)
                 .orElseThrow(() -> new GetUserByIdNotFoundException("User not found"));
-
         return mapper.toResponse(user);
     }
 
@@ -38,23 +37,19 @@ public class UserServiceImpl implements UserServicesInterface {
     public List<UserResponse> getAllUsers() {
         List<User> users = repository.findAll();
         List<UserResponse> responses = new ArrayList<>();
-
         for (User user : users) {
             responses.add(mapper.toResponse(user));
         }
-
         return responses;
     }
     @Override
     public UserResponse updateUser(String userId, UserRequests request) {
         User user = repository.findById(userId)
                 .orElseThrow(() -> new UpdateUserByIdNotFoundException("User not found"));
-
         user.setEmail(request.getEmail());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
         user.setRoles(request.getRoles());
-
         User updatedUser = repository.save(user);
         return mapper.toResponse(updatedUser);
     }
@@ -63,7 +58,6 @@ public class UserServiceImpl implements UserServicesInterface {
     public void deleteUser(String userId) {
         User user = repository.findById(userId)
                 .orElseThrow(() -> new DeleteUserByIdNotFoundException("User not found"));
-
         repository.delete(user);
     }
 }

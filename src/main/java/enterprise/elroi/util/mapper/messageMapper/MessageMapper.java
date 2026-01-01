@@ -9,7 +9,6 @@ public class MessageMapper {
 
     public MessagesResponse toResponse(Messages message) {
         if (message == null) return null;
-
         MessagesResponse response = new MessagesResponse();
         response.setChatId(message.getChatId());
         response.setSenderId(message.getSenderId());

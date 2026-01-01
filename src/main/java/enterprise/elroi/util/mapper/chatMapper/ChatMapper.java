@@ -9,7 +9,6 @@ public class ChatMapper {
 
     public ChatsResponse toResponse(Chats chat) {
         if (chat == null) return null;
-
         ChatsResponse response = new ChatsResponse();
         response.setAdId(null);
         response.setParticipantId(chat.getParticipantId());

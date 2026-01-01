@@ -40,7 +40,6 @@ public class MessagesServiceImpl implements MessagesServicesInterface {
     public List<MessagesResponse> getMessagesByChat(String chatId) {
         List<Messages> messagesList = repository.findAll();
         List<MessagesResponse> responses = new ArrayList<>();
-
         for (Messages message : messagesList) {
             if (message.getChatId().equals(chatId)) {
                 responses.add(mapper.toResponse(message));

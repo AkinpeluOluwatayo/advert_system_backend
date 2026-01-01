@@ -1,6 +1,5 @@
 package enterprise.elroi.security;
 
-import enterprise.elroi.dto.responses.UserResponse;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -44,7 +43,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null; // password not needed for JWT principal
+        return null;
     }
 
     @Override

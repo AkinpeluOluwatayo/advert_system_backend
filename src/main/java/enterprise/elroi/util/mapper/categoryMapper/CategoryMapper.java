@@ -9,7 +9,6 @@ public class CategoryMapper {
 
     public CategoryResponse toResponse(Category category) {
         if (category == null) return null;
-
         CategoryResponse response = new CategoryResponse();
         response.setName(category.getName());
         response.setDescription(category.getDescription());

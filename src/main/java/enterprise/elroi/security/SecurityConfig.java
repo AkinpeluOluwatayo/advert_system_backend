@@ -25,36 +25,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // Utilizes the corsFilter bean defined below
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Publicly accessible endpoints
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/ads/**").permitAll()
-
-                        // Secured chat endpoints - requires valid JWT
-                        .requestMatchers("/chat/**").authenticated()
-                        .requestMatchers("/messages/**").authenticated()
-
-                        // All other requests must be authenticated
-                        .anyRequest().authenticated()
-                )
-                // Add our JWT Filter before the standard UsernamePasswordAuthenticationFilter
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
+        http.csrf(csrf -> csrf.disable()).cors(cors -> {}).authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll().requestMatchers("/ads/**").permitAll().requestMatchers("/chat/**").authenticated().requestMatchers("/messages/**").authenticated().anyRequest().authenticated()).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        // Adjust the origin to match your frontend environment
         config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Explicitly allowing headers needed for JWT and JSON communication
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         config.setAllowCredentials(true);
 

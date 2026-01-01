@@ -8,13 +8,8 @@ import java.util.List;
 public interface UserServicesInterface {
 
     UserResponse getUserById(String userId);
-
-
     List<UserResponse> getAllUsers();
-
-
     UserResponse updateUser(String userId, UserRequests request);
-
     void deleteUser(String userId);
 
 

@@ -24,9 +24,7 @@ public class AuthServiceImpl implements AuthServicesInterface {
     private final AuthMapper mapper;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository,
-                           PasswordResetTokenRepository tokenRepository,
-                           AuthMapper mapper) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordResetTokenRepository tokenRepository, AuthMapper mapper) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.mapper = mapper;
@@ -34,15 +32,12 @@ public class AuthServiceImpl implements AuthServicesInterface {
 
     @Override
     public UserResponse register(UserRequests request) {
-
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistException("User already exists with this email");
         }
-
         String hashedPassword = BCrypt.withDefaults().hashToString(12, request.getPassword().toCharArray());
         User user = mapper.toUser(request);
         user.setPassword(hashedPassword);
-
         User savedUser = userRepository.save(user);
         return mapper.toUserResponse(savedUser);
     }
@@ -51,12 +46,10 @@ public class AuthServiceImpl implements AuthServicesInterface {
     public UserResponse login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserLoginNotFoundException("User not found"));
-
         BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
         if (!result.verified) {
             throw new InvalidPasswordException("Invalid password");
         }
-
         return mapper.toUserResponse(user);
     }
 
@@ -68,12 +61,10 @@ public class AuthServiceImpl implements AuthServicesInterface {
         if (!"ADMIN".equalsIgnoreCase(user.getRoles())) {
             throw new UserIsNotAnAdminException("User is not an admin");
         }
-
         BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
         if (!result.verified) {
             throw new InvalidAdminPassword("Invalid admin password");
         }
-
         return mapper.toUserResponse(user);
     }
 
@@ -84,17 +75,10 @@ public class AuthServiceImpl implements AuthServicesInterface {
         return mapper.toUserResponse(user);
     }
 
-    // AuthServiceImpl.java
-
     @Override
     public void forgotPassword(String email) {
-        // Debugging: check what is actually arriving from React
-        System.out.println("Processing forgot password for email: " + email);
-
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserForgotPasswordEmailNotFoundException("User not found with email: " + email));
-
-        // Delete any old tokens for this user if you want to keep DB clean (Optional)
 
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken();
@@ -103,11 +87,6 @@ public class AuthServiceImpl implements AuthServicesInterface {
         resetToken.setUsed(false);
 
         tokenRepository.save(resetToken);
-
-        // Ensure this uses http (not https) unless you have SSL set up locally
-        System.out.println("============================================");
-        System.out.println("Password Reset link: http://localhost:5173/reset-password?token=" + token);
-        System.out.println("============================================");
     }
     @Override
     public void resetPassword(String token, String newPassword) {
@@ -117,17 +96,14 @@ public class AuthServiceImpl implements AuthServicesInterface {
         if (resetToken.isUsed()) {
             throw new TokenHasBeenUsedException("Token already used");
         }
-
         User user = userRepository.findById(resetToken.getUserId())
                 .orElseThrow(() -> new UserNotFoundTokenException("User not found"));
 
         String hashedPassword = BCrypt.withDefaults().hashToString(12, newPassword.toCharArray());
         user.setPassword(hashedPassword);
         userRepository.save(user);
-
         resetToken.setUsed(true);
         tokenRepository.save(resetToken);
-
         System.out.println("Password successfully reset for user: " + user.getEmail());
     }
 

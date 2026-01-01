@@ -45,7 +45,6 @@ public class ChatServiceImpl implements ChatServicesInterface {
     public List<ChatsResponse> getChatsByUser(String userId) {
         List<Chats> chatsList = repository.findAll();
         if (chatsList == null) chatsList = new ArrayList<>();
-
         List<ChatsResponse> responses = new ArrayList<>();
         for (Chats chat : chatsList) {
             try {
@@ -53,7 +52,6 @@ public class ChatServiceImpl implements ChatServicesInterface {
                     responses.add(mapper.toResponse(chat));
                 }
             } catch (Exception ex) {
-
             }
         }
         return responses;

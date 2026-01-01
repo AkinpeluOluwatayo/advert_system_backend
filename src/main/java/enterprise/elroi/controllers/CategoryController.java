@@ -41,9 +41,7 @@ public class CategoryController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
-            @PathVariable("id") String id,
-            @RequestBody CategoryRequests request) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(@PathVariable("id") String id, @RequestBody CategoryRequests request) {
         CategoryResponse response = categoryService.updateCategory(id, request);
         return ResponseEntity.ok(new ApiResponse<>(true, response));
     }
