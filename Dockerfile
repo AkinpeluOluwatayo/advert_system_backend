@@ -11,7 +11,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-e
+
 FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
