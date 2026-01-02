@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "https://dealbridgeconnect.netlify.app", allowCredentials = "true")
 @RequestMapping("/messages")
 public class MessagesController {
 

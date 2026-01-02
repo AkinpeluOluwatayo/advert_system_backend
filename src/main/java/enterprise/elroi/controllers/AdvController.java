@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "https://dealbridgeconnect.netlify.app", allowCredentials = "true")
 @RequestMapping("/ads")
 public class AdvController {
 

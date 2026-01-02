@@ -15,7 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+
+@CrossOrigin(origins = "https://dealbridgeconnect.netlify.app", allowCredentials = "true")
 @RequestMapping("/auth")
 public class AuthController {
 
@@ -29,48 +30,85 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Map<String, Object>>> register(@RequestBody UserRequests request) {
-        try {UserResponse registeredUser = authService.register(request);String token = generateToken(registeredUser);Map<String, Object> data = new HashMap<>();data.put("user", registeredUser);data.put("token", token);
+        try {
+            UserResponse registeredUser = authService.register(request);
+            String token = generateToken(registeredUser);
+            Map<String, Object> data = new HashMap<>();
+            data.put("user", registeredUser);
+            data.put("token", token);
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(true, data));
-        } catch (UserAlreadyExistException e) {Map<String, Object> errorData = new HashMap<>();errorData.put("message", e.getMessage());
+        } catch (UserAlreadyExistException e) {
+            Map<String, Object> errorData = new HashMap<>();
+            errorData.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, errorData));
-        } catch (Exception e) {Map<String, Object> errorData = new HashMap<>();errorData.put("message", "Registration failed.");
+        } catch (Exception e) {
+            Map<String, Object> errorData = new HashMap<>();
+            errorData.put("message", "Registration failed.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, errorData));
         }
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<Map<String, Object>>> login(@RequestBody UserRequests request) {
-        try {UserResponse userResponse = authService.login(request.getEmail(), request.getPassword());String token = generateToken(userResponse);Map<String, Object> data = new HashMap<>();data.put("user", userResponse);data.put("token", token);
+        try {
+            UserResponse userResponse = authService.login(request.getEmail(), request.getPassword());
+            String token = generateToken(userResponse);
+            Map<String, Object> data = new HashMap<>();
+            data.put("user", userResponse);
+            data.put("token", token);
             return ResponseEntity.ok(new ApiResponse<>(true, data));
-        } catch (Exception e) {Map<String, Object> errorData = new HashMap<>();errorData.put("message", "Invalid email or password");
+        } catch (Exception e) {
+            Map<String, Object> errorData = new HashMap<>();
+            errorData.put("message", "Invalid email or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, errorData));
         }
     }
 
-
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<Map<String, Object>>> forgotPassword(@RequestBody Map<String, String> request) {
-        try {String email = request.get("email");if (email == null || email.isEmpty()) {throw new IllegalArgumentException("Email is required");}authService.forgotPassword(email);Map<String, Object> data = new HashMap<>();data.put("message", "Reset link has been generated (check console)");
+        try {
+            String email = request.get("email");
+            if (email == null || email.isEmpty()) {
+                throw new IllegalArgumentException("Email is required");
+            }
+            authService.forgotPassword(email);
+            Map<String, Object> data = new HashMap<>();
+            data.put("message", "Reset link generated");
             return ResponseEntity.ok(new ApiResponse<>(true, data));
-        } catch (Exception e) {Map<String, Object> errorData = new HashMap<>();errorData.put("message", e.getMessage());
+        } catch (Exception e) {
+            Map<String, Object> errorData = new HashMap<>();
+            errorData.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, errorData));
         }
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<Map<String, Object>>> resetPassword(@RequestParam("token") String token, @RequestBody Map<String, String> request) {
-        try {String newPassword = request.get("newPassword");authService.resetPassword(token, newPassword);Map<String, Object> data = new HashMap<>();data.put("message", "Password successfully reset");
+        try {
+            String newPassword = request.get("newPassword");
+            authService.resetPassword(token, newPassword);
+            Map<String, Object> data = new HashMap<>();
+            data.put("message", "Password successfully reset");
             return ResponseEntity.ok(new ApiResponse<>(true, data));
-        } catch (Exception e) {Map<String, Object> errorData = new HashMap<>();errorData.put("message", e.getMessage());
+        } catch (Exception e) {
+            Map<String, Object> errorData = new HashMap<>();
+            errorData.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, errorData));
         }
     }
 
     @PostMapping("/admin/login")
     public ResponseEntity<ApiResponse<Map<String, Object>>> adminLogin(@RequestBody UserRequests request) {
-        try {UserResponse adminResponse = authService.adminLogin(request.getEmail(), request.getPassword());String token = generateToken(adminResponse);Map<String, Object> data = new HashMap<>();data.put("admin", adminResponse);data.put("token", token);
+        try {
+            UserResponse adminResponse = authService.adminLogin(request.getEmail(), request.getPassword());
+            String token = generateToken(adminResponse);
+            Map<String, Object> data = new HashMap<>();
+            data.put("admin", adminResponse);
+            data.put("token", token);
             return ResponseEntity.ok(new ApiResponse<>(true, data));
-        } catch (Exception e) {Map<String, Object> errorData = new HashMap<>();errorData.put("message", "Invalid admin credentials");
+        } catch (Exception e) {
+            Map<String, Object> errorData = new HashMap<>();
+            errorData.put("message", "Invalid admin credentials");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, errorData));
         }
     }
